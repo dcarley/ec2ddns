@@ -20,35 +20,39 @@ Create a new IAM user and policy using Fog:
 require 'fog'
 require 'pp'
 
-@username   = "ec2ddns"
-@zone_id    = "XXX"
+@username = "ec2ddns"
+@zone_id  = "XXX"
 
-iam     = Fog::AWS::IAM.new()
-user    = iam.create_user(@username)
-keys    = iam.create_access_key("UserName" => @username)
+iam   = Fog::AWS::IAM.new()
+user  = iam.create_user(@username)
+keys  = iam.create_access_key("UserName" => @username)
 
 pp keys.body["AccessKey"]
-access_key_id       = keys.body["AccessKey"]["AccessKeyId"]
-secret_access_key   = keys.body["AccessKey"]["SecretAccessKey"]
+access_key_id     = keys.body["AccessKey"]["AccessKeyId"]
+secret_access_key = keys.body["AccessKey"]["SecretAccessKey"]
 
 policy_statement = {
-   "Statement" => [
-      {
-         "Effect" => "Allow",
-         "Action" => ["route53:ListHostedZones"],
-         "Resource" => "*"
-      },
-      {
-         "Effect" => "Allow",
-         "Action" => ["route53:GetHostedZone", "route53:ListResourceRecordSets", "route53:ChangeResourceRecordSets"],
-         "Resource" => "arn:aws:route53:::hostedzone/" + @zone_id
-      },
-      {
-         "Effect" => "Allow",
-         "Action" => ["route53:GetChange"],
-         "Resource" => "arn:aws:route53:::change/*"
-      }
-   ]
+  "Statement" => [
+    {
+      "Effect" => "Allow",
+      "Action" => ["route53:ListHostedZones"],
+      "Resource" => "*"
+    },
+    {
+      "Effect" => "Allow",
+      "Action" => [
+         "route53:GetHostedZone",
+         "route53:ListResourceRecordSets",
+         "route53:ChangeResourceRecordSets"
+       ],
+      "Resource" => "arn:aws:route53:::hostedzone/" + @zone_id
+    },
+    {
+      "Effect" => "Allow",
+      "Action" => ["route53:GetChange"],
+      "Resource" => "arn:aws:route53:::change/*"
+    }
+  ]
 }
 
 iam.put_user_policy(@username, @username, policy_statement)
